@@ -1,0 +1,51 @@
+# Fabio Alessandro Locati's Nebula service definition served as a base here:
+#
+# https://src.fedoraproject.org/rpms/nebula/blob/rawhide/f/nebula.service
+# https://src.fedoraproject.org/rpms/nebula/blob/2815e043beb9aaf3302f14fef98078e940f36fc2/f/nebula.service
+#
+# I applied some changes inspired by the dracut-sshd service definition on top of it:
+#
+# https://github.com/gsauthof/dracut-sshd/blob/master/46sshd/sshd.service
+# https://github.com/gsauthof/dracut-sshd/blob/4dc958ddb50a2b412f4fa9f0eaf59edb37006ba2/46sshd/sshd.service
+#
+# Finally I enabled indefinite restarts – it's critical to me that the tunnel comes up
+# after some period of intermittent failures:
+#
+# https://michael.stapelberg.ch/posts/2024-01-17-systemd-indefinite-service-restarts/
+
+[Unit]
+Description=Nebula overlay networking tool
+DefaultDependencies=no
+Before=cryptsetup.target
+
+# To achieve indefinite restarts (combined with the Service counterpart)
+StartLimitIntervalSec=0
+
+[Service]
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=$NEBULA -config /etc/nebula-dracut-config.yml
+SyslogIdentifier=nebula
+CapabilityBoundingSet=CAP_NET_ADMIN
+RestrictNamespaces=yes
+ProtectClock=true
+ProtectSystem=strict
+ProtectHostname=yes
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+NoNewPrivileges=yes
+PrivateTmp=yes
+UMask=0077
+RestrictAddressFamilies=AF_NETLINK AF_INET AF_INET6
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/net/tun rw
+
+# To achieve indefinite restarts (combined with the Unit counterpart)
+Restart=always
+RestartSec=1s
+
+[Install]
+WantedBy=sysinit.target

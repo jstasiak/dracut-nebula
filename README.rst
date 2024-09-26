@@ -1,12 +1,14 @@
 dracut-nebula
 =============
 
-``dracut-nebula`` integrates the Nebula overlay networking tool (VPN, tunnel) into
-the initramfs.
+``dracut-nebula`` integrates the Nebula VPN into Dracut-based `initramfs
+<https://en.wikipedia.org/wiki/Initial_ramdisk>`_.
 
 In combination with `dracut-sshd <https://github.com/gsauthof/dracut-sshd>`_ it
-enables remote root filesystem unlocking (or Dracut emergency shell access in
-general) over Nebula.
+enables remote root filesystem unlocking (in full disk encryption scenarios)
+and otherwise gives you access to the `early userspace
+<https://wiki.archlinux.org/title/Arch_boot_process#Early_userspace>`_.
+All via Nebula, without having to be connected to the same physical network.
 
 Compatibility: tested on Fedora 40 but any system using Dracut as the initramfs
 manager and systemd as the init system should work (with the same caveats in
@@ -39,13 +41,13 @@ How to install dracut-nebula?
         chown root /etc/nebula-dracut-config.yml
         chmod 600 /etc/nebula-dracut-config.yml
 
-   The configuration will be stored on an unencrypted filesystem and can be exfiltrated.
+   **The configuration will be stored on an unencrypted filesystem and can be exfiltrated.**
    Therefore, to minimize the attack surface, it needs to be completely separate from your
-   main Nebula configuration from the machine (if any) and it shouldn't be able to connect
-   to anything within your Nebula network unless you have a good reason to allow that.
+   main Nebula configuration (if any). It also shouldn't be able to connect to anything
+   within your Nebula network unless you have a good reason to allow that.
 
    Assuming you'll be using SSH to connect to the Dracut shell the configuration needs to
-   allow incoming SSH connections from the appropriate hosts – port 22/tcp unless you changed
+   allow incoming SSH connections from the appropriate hosts – port `22/tcp` unless you changed
    the port number when installing ``dracut-sshd``.
 
 #. Regenerate initramfs::
